@@ -1452,7 +1452,7 @@
   }
 
   async function handleSubmit() {
-    const activeTab = document.querySelector('.cb-tab.active')?.dataset.tab || 'login';
+    const activeTab = document.getElementById('cbFormSignup')?.style.display !== 'none' ? 'signup' : 'login';
     const email = document.getElementById('cbEmail')?.value;
     const password = document.getElementById('cbPassword')?.value;
     const name = document.getElementById('cbName')?.value;
