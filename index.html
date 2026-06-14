@@ -68,7 +68,6 @@
     }
     .nav-logo-mark svg { color: white; }
 
-    /* Nav links — now on the RIGHT, no sign-in/CTA buttons */
     .nav-links {
       display: flex; align-items: center; gap: 2rem;
       list-style: none;
@@ -81,7 +80,6 @@
     }
     .nav-links a:hover { color: var(--text); }
 
-    /* Hamburger — visible only on mobile */
     .hamburger {
       display: none;
       flex-direction: column; gap: 5px;
@@ -94,12 +92,10 @@
       background: var(--text); border-radius: 2px;
       transition: transform 0.3s, opacity 0.3s;
     }
-    /* Animated X state */
     .hamburger.open span:nth-child(1) { transform: translateY(7px) rotate(45deg); }
     .hamburger.open span:nth-child(2) { opacity: 0; }
     .hamburger.open span:nth-child(3) { transform: translateY(-7px) rotate(-45deg); }
 
-    /* Mobile dropdown menu */
     .mobile-menu {
       position: fixed; top: 68px; left: 0; right: 0;
       background: rgba(240,252,250,0.97);
@@ -531,7 +527,6 @@
     }
     @media (max-width: 640px) {
       nav { padding: 0 1.2rem; }
-      /* Hide desktop nav links on mobile, show hamburger */
       .nav-links { display: none; }
       .hamburger { display: flex; }
       section { padding: 70px 1.2rem; }
@@ -556,7 +551,6 @@
     CreatorBridge
   </a>
 
-  <!-- Desktop nav links on the right -->
   <ul class="nav-links" id="navLinks">
     <li><a href="#features">Features</a></li>
     <li><a href="#how-it-works">How It Works</a></li>
@@ -564,13 +558,11 @@
     <li><a href="#testimonials">About</a></li>
   </ul>
 
-  <!-- Hamburger: mobile only -->
   <button class="hamburger" id="hamburger" aria-label="Toggle menu" aria-expanded="false">
     <span></span><span></span><span></span>
   </button>
 </nav>
 
-<!-- Mobile dropdown — appears under nav when hamburger is open -->
 <div class="mobile-menu" id="mobileMenu" aria-hidden="true">
   <a href="#features">Features <span class="link-arrow">→</span></a>
   <a href="#how-it-works">How It Works <span class="link-arrow">→</span></a>
@@ -1035,13 +1027,11 @@
 </footer>
 
 <script>
-  // Sticky nav
   const nav = document.getElementById('navbar');
   window.addEventListener('scroll', () => {
     nav.classList.toggle('scrolled', window.scrollY > 20);
   });
 
-  // Hamburger toggle — animates to X, shows/hides mobile menu
   const ham = document.getElementById('hamburger');
   const menu = document.getElementById('mobileMenu');
 
@@ -1052,7 +1042,6 @@
     menu.setAttribute('aria-hidden', !isOpen);
   });
 
-  // Close menu on link click
   menu.querySelectorAll('a').forEach(a => {
     a.addEventListener('click', () => {
       menu.classList.remove('open');
@@ -1062,7 +1051,6 @@
     });
   });
 
-  // Close menu on outside click
   document.addEventListener('click', (e) => {
     if (!nav.contains(e.target) && !menu.contains(e.target)) {
       menu.classList.remove('open');
@@ -1072,14 +1060,12 @@
     }
   });
 
-  // Scroll fade-up
   const fadeEls = document.querySelectorAll('.fade-up');
   const obs = new IntersectionObserver((entries) => {
     entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('visible'); obs.unobserve(e.target); } });
   }, { threshold: 0.12 });
   fadeEls.forEach(el => obs.observe(el));
 
-  // Counter animation for stats
   function animateCounter(el, target, suffix) {
     let start = 0;
     const duration = 1800;
@@ -1137,7 +1123,6 @@
   }
   .cb-overlay.active .cb-modal { transform: translateY(0) scale(1); }
 
-  /* Coloured top bar — changes per role */
   .cb-modal-bar {
     position: absolute; top: 0; left: 0; right: 0;
     height: 4px; border-radius: var(--radius-xl) var(--radius-xl) 0 0;
@@ -1177,7 +1162,6 @@
   }
   .cb-modal-sub { font-size: 0.88rem; color: var(--text-muted); margin-bottom: 24px; line-height: 1.5; }
 
-  /* Tab switcher */
   .cb-tabs {
     display: flex; background: var(--bg);
     border: 1px solid var(--border); border-radius: var(--radius-sm);
@@ -1192,7 +1176,6 @@
   }
   .cb-tab.active { background: var(--white); color: var(--text); box-shadow: var(--shadow-sm); }
 
-  /* Fields */
   .cb-form { display: flex; flex-direction: column; gap: 14px; }
   .cb-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
   .cb-field { display: flex; flex-direction: column; gap: 5px; }
@@ -1207,14 +1190,12 @@
   .cb-field input::placeholder { color: var(--text-light); }
   .cb-field input:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(98,142,203,0.12); }
 
-  /* Password strength */
   .cb-pwd-bars { display: flex; gap: 4px; margin-top: 5px; }
   .cb-pwd-bar { flex: 1; height: 3px; border-radius: 2px; background: var(--border); transition: background 0.3s; }
 
   .cb-forgot { font-size: 0.8rem; color: var(--text-muted); text-align: right; cursor: pointer; transition: color 0.2s; }
   .cb-forgot:hover { color: var(--accent); }
 
-  /* Submit */
   .cb-submit {
     width: 100%; padding: 13px;
     border-radius: var(--radius-sm); border: none;
@@ -1228,12 +1209,10 @@
   .cb-submit.editor  { background: #16a34a; color: white; box-shadow: 0 4px 16px rgba(22,163,74,0.3); }
   .cb-submit.editor:hover  { background: #15803d; box-shadow: 0 8px 24px rgba(22,163,74,0.38); }
 
-  /* Divider */
   .cb-divider { display: flex; align-items: center; gap: 10px; }
   .cb-divider::before, .cb-divider::after { content:''; flex:1; height:1px; background: var(--border); }
   .cb-divider span { font-size: 0.78rem; color: var(--text-light); }
 
-  /* Google button */
   .cb-google {
     width: 100%; padding: 11px;
     background: var(--white); color: var(--text);
@@ -1247,7 +1226,6 @@
   .cb-terms { font-size: 0.75rem; color: var(--text-light); text-align: center; margin-top: 4px; line-height: 1.5; }
   .cb-terms a { color: var(--text-muted); text-decoration: underline; }
 
-  /* Success state */
   .cb-success { display: none; flex-direction: column; align-items: center; text-align: center; gap: 12px; padding: 16px 0; }
   .cb-success.visible { display: flex; }
   .cb-success-icon {
@@ -1291,11 +1269,11 @@
       <div class="cb-form">
         <div class="cb-field">
           <label>Email address</label>
-          <input type="email" placeholder="you@example.com" autocomplete="email"/>
+          <input id="cbLoginEmail" type="email" placeholder="you@example.com" autocomplete="email"/>
         </div>
         <div class="cb-field">
           <label>Password</label>
-          <input type="password" placeholder="••••••••" autocomplete="current-password"/>
+          <input id="cbLoginPassword" type="password" placeholder="••••••••" autocomplete="current-password"/>
         </div>
         <div class="cb-forgot">Forgot password?</div>
         <button class="cb-submit" id="cbLoginBtn" onclick="handleSubmit()">Log in</button>
@@ -1318,20 +1296,20 @@
         <div class="cb-row">
           <div class="cb-field">
             <label>First name</label>
-            <input type="text" placeholder="Alex" autocomplete="given-name"/>
+            <input id="cbSignupFirstName" type="text" placeholder="Alex" autocomplete="given-name"/>
           </div>
           <div class="cb-field">
             <label>Last name</label>
-            <input type="text" placeholder="Rivera" autocomplete="family-name"/>
+            <input id="cbSignupLastName" type="text" placeholder="Rivera" autocomplete="family-name"/>
           </div>
         </div>
         <div class="cb-field">
           <label>Email address</label>
-          <input type="email" placeholder="you@example.com" autocomplete="email"/>
+          <input id="cbSignupEmail" type="email" placeholder="you@example.com" autocomplete="email"/>
         </div>
         <div class="cb-field">
           <label>Password</label>
-          <input type="password" placeholder="At least 8 characters" autocomplete="new-password"
+          <input id="cbSignupPassword" type="password" placeholder="At least 8 characters" autocomplete="new-password"
             oninput="updatePwdStrength(this.value)"/>
           <div class="cb-pwd-bars">
             <div class="cb-pwd-bar" id="pb1"></div>
@@ -1398,7 +1376,6 @@
     cbRole = role;
     cbTab  = 'login';
 
-    // Reset success
     const s = document.getElementById('cbSuccess');
     s.classList.remove('visible');
     s.style.display = 'none';
@@ -1451,32 +1428,57 @@
     if (e.target === document.getElementById('cbOverlay')) closeModal();
   }
 
+  // ── FIXED handleSubmit — reads correct IDs based on active tab ──
   async function handleSubmit() {
-    const activeTab = document.getElementById('cbFormSignup')?.style.display !== 'none' ? 'signup' : 'login';
-    const email = document.getElementById('cbEmail')?.value;
-    const password = document.getElementById('cbPassword')?.value;
-    const name = document.getElementById('cbName')?.value;
+    const activeTab = document.getElementById('cbFormSignup').style.display !== 'none' ? 'signup' : 'login';
 
     if (activeTab === 'signup') {
-      const res = await fetch(`${AUTH_API_BASE}/auth/signup`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name, email, password, role: cbRole })
-      });
-      const data = await res.json();
-      if (data.error) return alert(data.error);
-      alert('Account created! Please verify your email before logging in.');
-      return;
+      const firstName = document.getElementById('cbSignupFirstName').value.trim();
+      const lastName  = document.getElementById('cbSignupLastName').value.trim();
+      const email     = document.getElementById('cbSignupEmail').value.trim();
+      const password  = document.getElementById('cbSignupPassword').value;
+      const name      = (firstName + ' ' + lastName).trim();
+
+      if (!firstName || !email || !password) {
+        alert('Please fill in all required fields.');
+        return;
+      }
+
+      try {
+        const res = await fetch(`${AUTH_API_BASE}/auth/signup`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ name, email, password, role: cbRole })
+        });
+        const data = await res.json();
+        if (data.error) { alert(data.error); return; }
+        alert('Account created! You can now log in.');
+        switchTab('login');
+      } catch (err) {
+        alert('Could not reach the server. Please try again.');
+      }
+
     } else {
-      const res = await fetch(`${AUTH_API_BASE}/auth/login`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, password })
-      });
-      const data = await res.json();
-      if (data.error) return alert(data.error);
-      showLoginSuccess({ name: data.name, email: data.email, role: data.role });
-      return;
+      const email    = document.getElementById('cbLoginEmail').value.trim();
+      const password = document.getElementById('cbLoginPassword').value;
+
+      if (!email || !password) {
+        alert('Please enter your email and password.');
+        return;
+      }
+
+      try {
+        const res = await fetch(`${AUTH_API_BASE}/auth/login`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email, password })
+        });
+        const data = await res.json();
+        if (data.error) { alert(data.error); return; }
+        showLoginSuccess({ name: data.name, email: data.email, role: data.role });
+      } catch (err) {
+        alert('Could not reach the server. Please try again.');
+      }
     }
   }
 
@@ -1498,24 +1500,13 @@
 
   document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModal(); });
 
-  // ── Real Google OAuth (Authorization Code flow via backend) ──
-  //
-  // CONFIGURE THIS: point at your running auth backend.
-  //   Local dev:   https://creatorbridge-backend-tjrd.onrender.com
-  //   Production:  https://your-backend-host.com
   const AUTH_API_BASE = 'https://creatorbridge-backend-tjrd.onrender.com';
 
-  // Step 1: full-page redirect to the backend, which redirects to Google.
-  // We can't do this with fetch()/popups reliably across origins - a real
-  // top-level navigation is required so Google's consent screen can set
-  // its own cookies and redirect back to our backend, which then sets
-  // our session cookie and redirects back here.
   function handleGoogleAuth() {
     const role = cbRole === 'editor' ? 'editor' : 'creator';
     window.location.href = `${AUTH_API_BASE}/auth/google/start?role=${role}`;
   }
 
-  // Shows the "success" panel inside the modal, then routes to the dashboard.
   function showLoginSuccess(user) {
     const role = user.role === 'editor' ? 'editor' : 'creator';
     cbRole = role;
@@ -1550,8 +1541,6 @@
     }, 1800);
   }
 
-  // Checks for an existing session cookie (set by the backend after a
-  // successful Google login) and returns the user, or null.
   async function checkExistingSession() {
     try {
       const res = await fetch(`${AUTH_API_BASE}/auth/me`, {
@@ -1566,7 +1555,6 @@
     }
   }
 
-  // Logs out: clears the backend session cookie and returns to homepage.
   async function handleLogout() {
     try {
       await fetch(`${AUTH_API_BASE}/auth/logout`, {
@@ -1579,9 +1567,6 @@
     goBackHome();
   }
 
-  // On page load: if we just came back from the OAuth redirect
-  // (?login=success) or already have a valid session cookie, fetch the
-  // user and jump straight to their dashboard.
   (async function initAuthState() {
     const params = new URLSearchParams(window.location.search);
     const loginResult = params.get('login');
@@ -1589,7 +1574,6 @@
 
     if (authError) {
       console.warn('Google login failed:', authError);
-      // Clean the URL so refreshes don't re-trigger this.
       window.history.replaceState({}, '', window.location.pathname);
       return;
     }
@@ -1606,8 +1590,6 @@
       return;
     }
 
-    // No special query params - check silently for an existing session
-    // so returning users skip straight to their dashboard.
     const user = await checkExistingSession();
     if (user) {
       cbRole = user.role === 'editor' ? 'editor' : 'creator';
@@ -1661,7 +1643,6 @@
   .pill-prog   { background: rgba(98,142,203,0.15); color: #93c5fd; }
   .pill-done   { background: rgba(168,85,247,0.15); color: #c084fc; }
   .pill-review { background: rgba(251,191,36,0.15); color: #fbbf24; }
-
 </style>
 
 <div id="cbWelcomePage">
