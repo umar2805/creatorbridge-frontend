@@ -1451,12 +1451,33 @@
     if (e.target === document.getElementById('cbOverlay')) closeModal();
   }
 
-  function handleSubmit() {
-    closeModal();
-    document.getElementById('cbWelcomePage').style.display = 'block';
-    document.getElementById('cbWelcomeCreator').style.display = cbRole === 'creator' ? 'block' : 'none';
-    document.getElementById('cbWelcomeEditor').style.display  = cbRole === 'editor'  ? 'block' : 'none';
-    window.scrollTo({ top: 0, behavior: 'instant' });
+  async function handleSubmit() {
+    const activeTab = document.querySelector('.cb-tab.active')?.dataset.tab || 'login';
+    const email = document.getElementById('cbEmail')?.value;
+    const password = document.getElementById('cbPassword')?.value;
+    const name = document.getElementById('cbName')?.value;
+
+    if (activeTab === 'signup') {
+      const res = await fetch(`${AUTH_API_BASE}/auth/signup`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name, email, password, role: cbRole })
+      });
+      const data = await res.json();
+      if (data.error) return alert(data.error);
+      alert('Account created! Please verify your email before logging in.');
+      return;
+    } else {
+      const res = await fetch(`${AUTH_API_BASE}/auth/login`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password })
+      });
+      const data = await res.json();
+      if (data.error) return alert(data.error);
+      showLoginSuccess({ name: data.name, email: data.email, role: data.role });
+      return;
+    }
   }
 
   function goBackHome() {
