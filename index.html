@@ -1574,10 +1574,13 @@
     }
 
     if (loginResult === 'success') {
+      const urlName = params.get('name');
+      const urlEmail = params.get('email');
+      const urlRole = params.get('role');
       window.history.replaceState({}, '', window.location.pathname);
-      const user = await checkExistingSession();
-      if (user) {
-        showLoginSuccess(user);
+      if (urlName && urlRole) {
+        cbRole = urlRole;
+        showLoginSuccess({ name: urlName, email: urlEmail, role: urlRole });
       }
       return;
     }
