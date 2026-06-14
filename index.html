@@ -1475,7 +1475,7 @@
         });
         const data = await res.json();
         if (data.error) { alert(data.error); return; }
-        showLoginSuccess({ name: data.name, email: data.email, role: data.role });
+        window.location.href = `${AUTH_API_BASE}/auth/login/verify?token=${data.token}`;
       } catch (err) {
         alert('Could not reach the server. Please try again.');
       }
