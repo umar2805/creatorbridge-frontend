@@ -1452,8 +1452,8 @@
         });
         const data = await res.json();
         if (data.error) { alert(data.error); return; }
-        alert('Logged in successfully.');
         closeModal();
+        window.location.href = 'dashboard.html';
       } catch (err) {
         alert('Could not reach the server. Please try again.');
       }
@@ -1484,7 +1484,7 @@
     const role = user.role === 'editor' ? 'editor' : 'creator';
     cbRole = role;
     closeModal();
-    alert(`Welcome, ${(user.name || 'there').split(' ')[0]}! You're logged in.`);
+    window.location.href = 'dashboard.html';
   }
 
   async function checkExistingSession() {
@@ -1522,6 +1522,9 @@
       window.history.replaceState({}, '', window.location.pathname);
       return;
     }
+
+    const existingUser = await checkExistingSession();
+    if (existingUser) { window.location.href = 'dashboard.html'; return; }
 
     if (loginResult === 'success') {
       const urlName = params.get('name');
