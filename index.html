@@ -1452,8 +1452,7 @@
         });
         const data = await res.json();
         if (data.error) { alert(data.error); return; }
-        closeModal();
-        window.location.href = 'dashboard.html';
+        window.location.href = `${AUTH_API_BASE}/auth/login/verify?token=${data.token}`;
       } catch (err) {
         alert('Could not reach the server. Please try again.');
       }
@@ -1527,14 +1526,7 @@
     if (existingUser) { window.location.href = 'dashboard.html'; return; }
 
     if (loginResult === 'success') {
-      const urlName = params.get('name');
-      const urlEmail = params.get('email');
-      const urlRole = params.get('role');
-      window.history.replaceState({}, '', window.location.pathname);
-      if (urlName && urlRole) {
-        cbRole = urlRole;
-        showLoginSuccess({ name: urlName, email: urlEmail, role: urlRole });
-      }
+      window.location.href = 'dashboard.html';
       return;
     }
   })();
