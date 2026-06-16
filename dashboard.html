@@ -914,7 +914,46 @@ function obFinish() {
   }
   if (obBio) document.getElementById('profile-bio-display').textContent = obBio;
   document.getElementById('onboarding-overlay').style.display = 'none';
+  var profile = { name: obName, bio: obBio, img: obProfileImg, skills: Array.from(selectedSkills) };
+  localStorage.setItem('cb_onboarding_done', '1');
+  localStorage.setItem('cb_profile', JSON.stringify(profile));
+  fetch('https://creatorbridge-backend-tjrd.onrender.com/auth/onboarding', {
+    method: 'POST', credentials: 'include',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ bio: obBio, skills: Array.from(selectedSkills), img: obProfileImg })
+  }).catch(function(){});
 }
+
+(async function restoreProfile() {
+  function applyProfile(p, name) {
+    document.getElementById('onboarding-overlay').style.display = 'none';
+    if (name) { document.getElementById('profile-name-display').textContent = name; document.getElementById('profile-handle-display').textContent = '@' + name.toLowerCase().replace(/\s+/g,'') + ' · Video Editor'; }
+    if (p.img) document.getElementById('profile-avatar-img').src = p.img;
+    if (p.bio) document.getElementById('profile-bio-display').textContent = p.bio;
+    if (p.skills && p.skills.length) { var el = document.getElementById('profile-skills-chips'); el.innerHTML = ''; p.skills.forEach(function(s) { var c = document.createElement('span'); c.className = 'chip'; c.textContent = s; el.appendChild(c); }); }
+  }
+  try {
+    var res = await fetch('https://creatorbridge-backend-tjrd.onrender.com/auth/onboarding', { credentials: 'include' });
+    if (res.ok) {
+      var data = await res.json();
+      if (data.onboarding && data.onboarding.done) {
+        // Also get name from /auth/me
+        var meRes = await fetch('https://creatorbridge-backend-tjrd.onrender.com/auth/me', { credentials: 'include' });
+        var me = meRes.ok ? await meRes.json() : {};
+        localStorage.setItem('cb_onboarding_done', '1');
+        localStorage.setItem('cb_profile', JSON.stringify({ ...data.onboarding, name: me.user && me.user.name }));
+        applyProfile(data.onboarding, me.user && me.user.name);
+        return;
+      }
+    }
+  } catch(e) {}
+  // Fall back to localStorage
+  if (!localStorage.getItem('cb_onboarding_done')) return;
+  try {
+    var p = JSON.parse(localStorage.getItem('cb_profile') || '{}');
+    applyProfile(p, p.name);
+  } catch(e) {}
+})();
 
 /* ══ NAV ══ */
 function navigateTo(page) {
