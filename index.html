@@ -1226,17 +1226,6 @@
   .cb-terms { font-size: 0.75rem; color: var(--text-light); text-align: center; margin-top: 4px; line-height: 1.5; }
   .cb-terms a { color: var(--text-muted); text-decoration: underline; }
 
-  .cb-success { display: none; flex-direction: column; align-items: center; text-align: center; gap: 12px; padding: 16px 0; }
-  .cb-success.visible { display: flex; }
-  .cb-success-icon {
-    width: 64px; height: 64px; border-radius: 50%;
-    display: flex; align-items: center; justify-content: center; font-size: 28px;
-  }
-  .cb-success-icon.creator { background: var(--accent-light); }
-  .cb-success-icon.editor  { background: #dcfce7; }
-  .cb-success h3 { font-family: 'Epilogue', sans-serif; font-size: 1.3rem; font-weight: 800; color: var(--text); }
-  .cb-success p { font-size: 0.88rem; color: var(--text-muted); line-height: 1.6; max-width: 280px; }
-
   @media (max-width: 480px) {
     .cb-modal { padding: 32px 20px 24px; }
     .cb-row { grid-template-columns: 1fr; }
@@ -1333,13 +1322,6 @@
       </div>
     </div>
 
-    <!-- Success state -->
-    <div class="cb-success" id="cbSuccess">
-      <div class="cb-success-icon" id="cbSuccessIcon"></div>
-      <h3 id="cbSuccessTitle"></h3>
-      <p id="cbSuccessSub"></p>
-      <button class="cb-submit" id="cbSuccessBtn" style="margin-top:8px" onclick="closeModal()">Back to homepage</button>
-    </div>
 
   </div>
 </div>
@@ -1376,10 +1358,6 @@
     cbRole = role;
     cbTab  = 'login';
 
-    const s = document.getElementById('cbSuccess');
-    s.classList.remove('visible');
-    s.style.display = 'none';
-
     applyRole(role);
     switchTab('login');
 
@@ -1399,7 +1377,6 @@
 
     document.getElementById('cbLoginBtn').className  = 'cb-submit ' + role;
     document.getElementById('cbSignupBtn').className = 'cb-submit ' + role;
-    document.getElementById('cbSuccessBtn').className = 'cb-submit ' + role;
 
     updateTitles(role, cbTab);
   }
@@ -1475,16 +1452,12 @@
         });
         const data = await res.json();
         if (data.error) { alert(data.error); return; }
-        window.location.href = `${AUTH_API_BASE}/auth/login/verify?token=${data.token}`;
+        alert('Logged in successfully.');
+        closeModal();
       } catch (err) {
         alert('Could not reach the server. Please try again.');
       }
     }
-  }
-
-  function goBackHome() {
-    document.getElementById('cbWelcomePage').style.display = 'none';
-    window.scrollTo({ top: 0, behavior: 'instant' });
   }
 
   function updatePwdStrength(val) {
@@ -1510,35 +1483,8 @@
   function showLoginSuccess(user) {
     const role = user.role === 'editor' ? 'editor' : 'creator';
     cbRole = role;
-    const c = cbConfig[role];
-
-    applyRole(role);
-
-    document.getElementById('cbTabs').style.display       = 'none';
-    document.getElementById('cbFormLogin').style.display  = 'none';
-    document.getElementById('cbFormSignup').style.display = 'none';
-
-    const successEl = document.getElementById('cbSuccess');
-    document.getElementById('cbSuccessIcon').textContent  = c.successIcon;
-    document.getElementById('cbSuccessIcon').className    = 'cb-success-icon ' + role;
-    document.getElementById('cbSuccessTitle').textContent = `Welcome, ${(user.name || 'there').split(' ')[0]}!`;
-    document.getElementById('cbSuccessSub').textContent   =
-      role === 'creator'
-        ? 'Your creator account is ready. Post a project and start finding talent today.'
-        : 'Your editor profile is active. Matching briefs will start appearing in your feed.';
-
-    document.getElementById('cbOverlay').classList.add('active');
-    document.body.style.overflow = 'hidden';
-    successEl.style.display = 'flex';
-    successEl.classList.add('visible');
-
-    setTimeout(() => {
-      closeModal();
-      document.getElementById('cbWelcomePage').style.display  = 'block';
-      document.getElementById('cbWelcomeCreator').style.display = role === 'creator' ? 'block' : 'none';
-      document.getElementById('cbWelcomeEditor').style.display  = role === 'editor'  ? 'block' : 'none';
-      window.scrollTo({ top: 0, behavior: 'instant' });
-    }, 1800);
+    closeModal();
+    alert(`Welcome, ${(user.name || 'there').split(' ')[0]}! You're logged in.`);
   }
 
   async function checkExistingSession() {
@@ -1564,7 +1510,6 @@
     } catch (err) {
       console.warn('Logout request failed:', err);
     }
-    goBackHome();
   }
 
   (async function initAuthState() {
@@ -1589,139 +1534,8 @@
       }
       return;
     }
-
-    const user = await checkExistingSession();
-    if (user) {
-      cbRole = user.role === 'editor' ? 'editor' : 'creator';
-      document.getElementById('cbWelcomePage').style.display = 'block';
-      document.getElementById('cbWelcomeCreator').style.display = cbRole === 'creator' ? 'block' : 'none';
-      document.getElementById('cbWelcomeEditor').style.display  = cbRole === 'editor'  ? 'block' : 'none';
-    }
   })();
 </script>
-
-<!-- ══ DASHBOARD ══ -->
-<style>
-  #cbWelcomePage {
-    display: none; position: fixed; inset: 0; z-index: 2000;
-    background: #0d0d0d; overflow-y: auto;
-    font-family: 'Inter', sans-serif;
-  }
-  .db-topbar {
-    display: flex; align-items: center; justify-content: space-between;
-    padding: 1.1rem 2rem;
-    border-bottom: 1px solid rgba(255,255,255,0.08);
-  }
-  .db-logo { font-family: 'Epilogue', sans-serif; font-weight: 700; font-size: 1.1rem; color: #fff; }
-  .db-back {
-    padding: 0.5rem 1.2rem; background: transparent;
-    border: 1px solid rgba(255,255,255,0.2); border-radius: 10px;
-    color: rgba(255,255,255,0.7); font-family: inherit;
-    font-size: 0.85rem; cursor: pointer; transition: all 0.2s;
-  }
-  .db-back:hover { background: rgba(255,255,255,0.08); color: #fff; }
-  .db-body { max-width: 900px; margin: 0 auto; padding: 3rem 2rem; }
-  .db-stats {
-    display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
-    gap: 14px; margin-bottom: 2.5rem;
-  }
-  .db-stat { background: #1a1a1a; border: 1px solid rgba(255,255,255,0.07); border-radius: 14px; padding: 1.2rem 1.4rem; }
-  .db-stat-label { font-size: 0.75rem; color: rgba(255,255,255,0.4); margin-bottom: 6px; }
-  .db-stat-val { font-size: 1.6rem; font-weight: 700; color: #fff; }
-  .db-section-title { font-size: 0.78rem; font-weight: 600; color: rgba(255,255,255,0.35); letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 1rem; }
-  .db-cards { display: flex; flex-direction: column; gap: 10px; margin-bottom: 2.5rem; }
-  .db-card {
-    background: #1a1a1a; border: 1px solid rgba(255,255,255,0.07);
-    border-radius: 14px; padding: 1.1rem 1.4rem;
-    display: flex; align-items: center; gap: 14px;
-  }
-  .db-card-icon { width: 40px; height: 40px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 1.1rem; flex-shrink: 0; }
-  .db-card-title { font-size: 0.95rem; font-weight: 600; color: #fff; margin-bottom: 2px; }
-  .db-card-sub { font-size: 0.8rem; color: rgba(255,255,255,0.4); }
-  .db-pill { margin-left: auto; font-size: 0.72rem; font-weight: 600; padding: 4px 10px; border-radius: 20px; white-space: nowrap; }
-  .pill-open   { background: rgba(22,163,74,0.15);  color: #4ade80; }
-  .pill-prog   { background: rgba(98,142,203,0.15); color: #93c5fd; }
-  .pill-done   { background: rgba(168,85,247,0.15); color: #c084fc; }
-  .pill-review { background: rgba(251,191,36,0.15); color: #fbbf24; }
-</style>
-
-<div id="cbWelcomePage">
-  <div class="db-topbar">
-    <div class="db-logo">CreatorBridge</div>
-    <div style="display:flex;gap:10px;">
-      <button class="db-back" onclick="goBackHome()">← Back to homepage</button>
-      <button class="db-back" onclick="handleLogout()">Log out</button>
-    </div>
-  </div>
-
-  <!-- Creator dashboard -->
-  <div id="cbWelcomeCreator" style="display:none">
-    <div class="db-body">
-      <div class="db-stats">
-        <div class="db-stat"><div class="db-stat-label">Active projects</div><div class="db-stat-val">3</div></div>
-        <div class="db-stat"><div class="db-stat-label">Applicants</div><div class="db-stat-val">12</div></div>
-        <div class="db-stat"><div class="db-stat-label">Completed</div><div class="db-stat-val">28</div></div>
-        <div class="db-stat"><div class="db-stat-label">Total spent</div><div class="db-stat-val">$1.4k</div></div>
-      </div>
-      <div class="db-section-title">My projects</div>
-      <div class="db-cards">
-        <div class="db-card">
-          <div class="db-card-icon" style="background:rgba(98,142,203,0.15)">📝</div>
-          <div><div class="db-card-title">YouTube Thumbnail — Tech Review</div><div class="db-card-sub">Budget $80 · 4 applicants</div></div>
-          <span class="db-pill pill-open">Open</span>
-        </div>
-        <div class="db-card">
-          <div class="db-card-icon" style="background:rgba(22,163,74,0.15)">🎬</div>
-          <div><div class="db-card-title">Intro animation — new series</div><div class="db-card-sub">Budget $250 · Alex R. hired</div></div>
-          <span class="db-pill pill-prog">In progress</span>
-        </div>
-        <div class="db-card">
-          <div class="db-card-icon" style="background:rgba(168,85,247,0.15)">✂️</div>
-          <div><div class="db-card-title">Short-form video edits (x5)</div><div class="db-card-sub">Budget $400 · Priya S.</div></div>
-          <span class="db-pill pill-done">Complete</span>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- Editor dashboard -->
-  <div id="cbWelcomeEditor" style="display:none">
-    <div class="db-body">
-      <div class="db-stats">
-        <div class="db-stat"><div class="db-stat-label">Active jobs</div><div class="db-stat-val">2</div></div>
-        <div class="db-stat"><div class="db-stat-label">Applied</div><div class="db-stat-val">5</div></div>
-        <div class="db-stat"><div class="db-stat-label">Completed</div><div class="db-stat-val">41</div></div>
-        <div class="db-stat"><div class="db-stat-label">Total earned</div><div class="db-stat-val">$3.2k</div></div>
-      </div>
-      <div class="db-section-title">My jobs</div>
-      <div class="db-cards">
-        <div class="db-card">
-          <div class="db-card-icon" style="background:rgba(98,142,203,0.15)">✂️</div>
-          <div><div class="db-card-title">Short-form video edits (x5)</div><div class="db-card-sub">Marcus K. · Due in 3 days</div></div>
-          <span class="db-pill pill-prog">In progress</span>
-        </div>
-        <div class="db-card">
-          <div class="db-card-icon" style="background:rgba(251,191,36,0.15)">🎙️</div>
-          <div><div class="db-card-title">Podcast episode cuts (x3)</div><div class="db-card-sub">Jade O. · Awaiting review</div></div>
-          <span class="db-pill pill-review">Review</span>
-        </div>
-      </div>
-      <div class="db-section-title">Open projects</div>
-      <div class="db-cards">
-        <div class="db-card">
-          <div class="db-card-icon" style="background:rgba(22,163,74,0.15)">📸</div>
-          <div><div class="db-card-title">YouTube Thumbnail — Tech Review</div><div class="db-card-sub">Budget $80 · 4 others applied</div></div>
-          <span class="db-pill pill-open">Open</span>
-        </div>
-        <div class="db-card">
-          <div class="db-card-icon" style="background:rgba(168,85,247,0.15)">📱</div>
-          <div><div class="db-card-title">Reels editor — lifestyle channel</div><div class="db-card-sub">Budget $300 · 2 others applied</div></div>
-          <span class="db-pill pill-open">Open</span>
-        </div>
-      </div>
-    </div>
-  </div>
-</div>
 
 </body>
 </html>
