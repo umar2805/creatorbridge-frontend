@@ -542,7 +542,7 @@
 <!-- ══ BIFROST DASHBOARD STYLES ══ -->
 <style>
 
-#bifrostApp *, #bifrostApp *::before, #bifrostApp *::after { box-sizing: border-box; margin: 0; padding: 0; }
+#bifrostApp :where(*, *::before, *::after) { box-sizing: border-box; margin: 0; padding: 0; }
 #bifrostApp {
   --bf-bg: #1e3d35; --bf-bg-light: #2a5045; --bf-bg-card: #1a3530;
   --bf-accent: #235347; --bf-accent-md: #2d6b5c; --bf-accent-lt: #3a8a73; --bf-accent-hl: #4aab8f;
