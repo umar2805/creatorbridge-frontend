@@ -564,7 +564,7 @@ body { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--tex
     </button>
   </nav>
   <div class="sidebar-bottom">
-    <button class="nav-btn logout-nav">
+    <button class="nav-btn logout-nav" onclick="if(confirm('Sign out of Bifrost?')){fetch('https://creatorbridge-backend-tjrd.onrender.com/auth/logout',{method:'POST',credentials:'include'}).finally(()=>{window.location.href='index.html';});}">
       <svg viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
       <span>Logout</span>
     </button>
@@ -1179,7 +1179,7 @@ var SETTINGS_FORMS = {
   billing: { title:'Payment & Billing', body:'<p class="s-hint">Manage where Bifrost sends your earnings.</p><label>Account Holder Name</label><input type="text" value="Alex Rivera"/><label>Bank / UPI ID</label><input type="text" placeholder="alexrivera@upi"/><label>PAN / Tax ID</label><input type="text" placeholder="ABCDE1234F"/><div class="s-toggle-row"><span>Auto-invoice on project close</span><div class="s-switch on" onclick="this.classList.toggle(\'on\')"></div></div><button class="btn-accent" onclick="saveSetting(\'Billing details saved\')">Save Billing Info</button>' }
 };
 function openSetting(key) {
-  if (key === 'logout') { if (confirm('Sign out of Bifrost?')) { alert('Logged out (demo).'); } return; }
+  if (key === 'logout') { if (confirm('Sign out of Bifrost?')) { fetch('https://creatorbridge-backend-tjrd.onrender.com/auth/logout', { method: 'POST', credentials: 'include' }).finally(() => { window.location.href = 'index.html'; }); } return; }
   var s = SETTINGS_FORMS[key]; if (!s) return;
   document.getElementById('s-modal-title').textContent = s.title;
   document.getElementById('s-modal-body').innerHTML = s.body;
