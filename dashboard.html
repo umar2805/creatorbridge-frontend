@@ -1468,22 +1468,19 @@ document.addEventListener('keydown', function(e) {
 /* ══ AUTH GUARD ══ */
 const AUTH_API_BASE = 'https://creatorbridge-backend-tjrd.onrender.com';
 (async function() {
+  // If redirected here fresh from login, cookie is already set — skip the check
+  const params = new URLSearchParams(window.location.search);
+  if (params.get('login') === 'success') {
+    window.history.replaceState({}, '', window.location.pathname);
+    return;
+  }
   try {
     const res = await fetch(`${AUTH_API_BASE}/auth/me`, { credentials: 'include' });
     if (!res.ok) throw new Error('not authed');
     const data = await res.json();
     if (!data.user) throw new Error('no user');
   } catch(e) {
-    // Give the cookie one more second to settle then retry before giving up
-    await new Promise(r => setTimeout(r, 1000));
-    try {
-      const res = await fetch(`${AUTH_API_BASE}/auth/me`, { credentials: 'include' });
-      if (!res.ok) throw new Error('not authed');
-      const data = await res.json();
-      if (!data.user) throw new Error('no user');
-    } catch(e2) {
-      window.location.href = 'index.html';
-    }
+    window.location.href = 'index.html';
   }
 })();
 
