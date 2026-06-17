@@ -865,8 +865,10 @@ document.getElementById('ob-bio').addEventListener('input', function() {
   el.textContent = letters + ' / 100 letters minimum';
   el.className = 'ob-word-count' + (letters >= 100 ? ' ok' : letters > 60 ? ' warn' : '');
 });
+var obPfpFile = null;
 document.getElementById('ob-pfp-upload').addEventListener('change', function() {
   var f = this.files[0]; if (!f) return;
+  obPfpFile = f;
   obProfileImg = URL.createObjectURL(f);
   var img = document.getElementById('ob-pfp-img');
   img.src = obProfileImg; img.style.display = 'block';
@@ -899,7 +901,7 @@ function goToStep(nextStep) {
     if (d) d.classList.add('done');
   }
 }
-function obFinish() {
+async function obFinish() {
   if (obName) {
     document.getElementById('profile-name-display').textContent = obName;
     document.getElementById('profile-handle-display').textContent = '@' + obName.toLowerCase().replace(/\s+/g,'') + ' · Video Editor';
@@ -914,10 +916,20 @@ function obFinish() {
   }
   if (obBio) document.getElementById('profile-bio-display').textContent = obBio;
   document.getElementById('onboarding-overlay').style.display = 'none';
+  // Upload pfp to Cloudinary if selected
+  var pfpUrl = null;
+  if (obPfpFile) {
+    try {
+      var fd = new FormData(); fd.append('pfp', obPfpFile);
+      var r = await fetch('https://creatorbridge-backend-tjrd.onrender.com/upload/pfp', { method: 'POST', credentials: 'include', body: fd });
+      var d = await r.json();
+      if (d.url) pfpUrl = d.url;
+    } catch(e) {}
+  }
   fetch('https://creatorbridge-backend-tjrd.onrender.com/auth/onboarding', {
     method: 'POST', credentials: 'include',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ name: obName, bio: obBio, skills: Array.from(selectedSkills), img: obProfileImg, done: true })
+    body: JSON.stringify({ name: obName, bio: obBio, skills: Array.from(selectedSkills), img: pfpUrl || obProfileImg, done: true })
   }).catch(function(){});
 }
 
@@ -940,6 +952,8 @@ function obFinish() {
         var me = meRes.ok ? await meRes.json() : {};
         var displayName = ob.name || (me.user && me.user.name);
         applyProfile(ob, displayName);
+        // Load portfolio from backend
+        loadPortfolio();
         return;
       }
     }
@@ -948,6 +962,37 @@ function obFinish() {
   localStorage.removeItem('cb_onboarding_done');
   localStorage.removeItem('cb_profile');
 })();
+
+async function loadPortfolio() {
+  try {
+    var res = await fetch('https://creatorbridge-backend-tjrd.onrender.com/upload/portfolio', { credentials: 'include' });
+    if (!res.ok) return;
+    var data = await res.json();
+    var gridEl = document.getElementById('portfolio-grid');
+    var slot = document.getElementById('add-slot');
+    (data.portfolio || []).forEach(function(url) {
+      var isVideo = /\.(mp4|webm|mov|avi)$/i.test(url) || url.includes('/video/');
+      var item = document.createElement('div'); item.className = 'p-item';
+      var label = url.split('/').pop().split('.')[0].slice(0,16);
+      if (isVideo) {
+        item.innerHTML = '<video src="'+url+'" controls preload="metadata" playsinline></video><span class="p-tag">&#9654; '+label+'</span><div class="p-overlay"><button class="p-del">&#10005;</button></div>';
+      } else {
+        item.innerHTML = '<img src="'+url+'" alt="'+label+'"/><span class="p-tag">'+label+'</span><div class="p-overlay"><button class="p-del">&#10005;</button></div>';
+      }
+      item.querySelector('.p-del').addEventListener('click', function(e) {
+        e.stopPropagation();
+        fetch('https://creatorbridge-backend-tjrd.onrender.com/upload/portfolio/delete', {
+          method: 'POST', credentials: 'include',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ url: url })
+        }).catch(function(){});
+        item.remove(); postCount = Math.max(0,postCount-1); updatePostCount();
+      });
+      gridEl.insertBefore(item, slot);
+      postCount++; updatePostCount();
+    });
+  } catch(e) {}
+}
 
 /* ══ NAV ══ */
 function navigateTo(page) {
@@ -960,9 +1005,15 @@ document.querySelectorAll('.nav-btn[data-page]').forEach(function(btn) {
 });
 
 /* ══ AVATAR ══ */
-document.getElementById('avatar-upload').addEventListener('change', function() {
+document.getElementById('avatar-upload').addEventListener('change', async function() {
   var f = this.files[0]; if (!f) return;
   document.getElementById('profile-avatar-img').src = URL.createObjectURL(f);
+  try {
+    var fd = new FormData(); fd.append('pfp', f);
+    var r = await fetch('https://creatorbridge-backend-tjrd.onrender.com/upload/pfp', { method: 'POST', credentials: 'include', body: fd });
+    var d = await r.json();
+    if (d.url) document.getElementById('profile-avatar-img').src = d.url;
+  } catch(e) {}
 });
 
 /* ══ PORTFOLIO ══ */
@@ -975,7 +1026,7 @@ function updatePortfolioLimitUI() {
   var slot = document.getElementById('add-slot');
   if (slot) slot.style.display = postCount >= PORTFOLIO_LIMIT ? 'none' : '';
 }
-document.getElementById('portfolio-upload').addEventListener('change', function() {
+document.getElementById('portfolio-upload').addEventListener('change', async function() {
   var gridEl = document.getElementById('portfolio-grid');
   var slot = document.getElementById('add-slot');
   var remaining = PORTFOLIO_LIMIT - postCount;
@@ -983,26 +1034,49 @@ document.getElementById('portfolio-upload').addEventListener('change', function(
   if (this.files.length > files.length) {
     alert('You can upload a maximum of ' + PORTFOLIO_LIMIT + ' works. Only ' + files.length + ' added.');
   }
-  files.forEach(function(file) {
-    var url = URL.createObjectURL(file);
+  for (var i = 0; i < files.length; i++) {
+    var file = files[i];
+    var localUrl = URL.createObjectURL(file);
     var isVideo = file.type.startsWith('video/');
     var isAudio = file.type.startsWith('audio/');
     var item = document.createElement('div'); item.className = 'p-item';
     var label = file.name.split('.')[0].slice(0,16);
     if (isVideo) {
-      item.innerHTML = '<video src="'+url+'" controls preload="metadata" playsinline></video><span class="p-tag">&#9654; '+label+'</span><div class="p-overlay"><button class="p-del">&#10005;</button></div>';
+      item.innerHTML = '<video src="'+localUrl+'" controls preload="metadata" playsinline></video><span class="p-tag">&#9654; '+label+'</span><div class="p-overlay"><button class="p-del">&#10005;</button></div>';
     } else if (isAudio) {
       item.style.background='#1a3530';
-      item.innerHTML = '<div style="position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;"><svg viewBox="0 0 24 24" width="32" height="32" stroke="#4aab8f" fill="none" stroke-width="1.5"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg><audio controls src="'+url+'" style="width:90%;height:28px;"></audio></div><span class="p-tag">&#9834; '+label+'</span><div class="p-overlay"><button class="p-del">&#10005;</button></div>';
+      item.innerHTML = '<div style="position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;"><svg viewBox="0 0 24 24" width="32" height="32" stroke="#4aab8f" fill="none" stroke-width="1.5"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg><audio controls src="'+localUrl+'" style="width:90%;height:28px;"></audio></div><span class="p-tag">&#9834; '+label+'</span><div class="p-overlay"><button class="p-del">&#10005;</button></div>';
     } else {
-      item.innerHTML = '<img src="'+url+'" alt="'+label+'"/><span class="p-tag">'+label+'</span><div class="p-overlay"><button class="p-del">&#10005;</button></div>';
+      item.innerHTML = '<img src="'+localUrl+'" alt="'+label+'"/><span class="p-tag">'+label+'</span><div class="p-overlay"><button class="p-del">&#10005;</button></div>';
     }
-    item.querySelector('.p-del').addEventListener('click', function(e) {
-      e.stopPropagation(); item.remove(); postCount = Math.max(0,postCount-1); updatePostCount();
-    });
+    var cloudUrl = localUrl;
+    (function(it, f, lu) {
+      it.querySelector('.p-del').addEventListener('click', function(e) {
+        e.stopPropagation();
+        fetch('https://creatorbridge-backend-tjrd.onrender.com/upload/portfolio/delete', {
+          method: 'POST', credentials: 'include',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ url: cloudUrl })
+        }).catch(function(){});
+        it.remove(); postCount = Math.max(0,postCount-1); updatePostCount();
+      });
+    })(item, file, localUrl);
     gridEl.insertBefore(item, slot);
     postCount++; updatePostCount();
-  });
+    // Upload to Cloudinary in background
+    (async function(it, f) {
+      try {
+        var fd = new FormData(); fd.append('file', f);
+        var r = await fetch('https://creatorbridge-backend-tjrd.onrender.com/upload/portfolio', { method: 'POST', credentials: 'include', body: fd });
+        var d = await r.json();
+        if (d.url) {
+          cloudUrl = d.url;
+          var media = it.querySelector('video, img');
+          if (media) media.src = d.url;
+        }
+      } catch(e) {}
+    })(item, file);
+  }
   this.value='';
 });
 document.getElementById('add-slot').addEventListener('click', function() { document.getElementById('portfolio-upload').click(); });
