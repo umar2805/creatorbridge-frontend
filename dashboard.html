@@ -917,7 +917,7 @@ function obFinish() {
   fetch('https://creatorbridge-backend-tjrd.onrender.com/auth/onboarding', {
     method: 'POST', credentials: 'include',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ bio: obBio, skills: Array.from(selectedSkills), img: obProfileImg })
+    body: JSON.stringify({ name: obName, bio: obBio, skills: Array.from(selectedSkills), img: obProfileImg, done: true })
   }).catch(function(){});
 }
 
@@ -933,18 +933,18 @@ function obFinish() {
     var res = await fetch('https://creatorbridge-backend-tjrd.onrender.com/auth/onboarding', { credentials: 'include' });
     if (res.ok) {
       var data = await res.json();
-      if (data.onboarding && data.onboarding.done) {
-        // Also get name from /auth/me
+      var ob = data.onboarding || {};
+      // Consider onboarding done if any real data exists
+      if (ob.bio || (ob.skills && ob.skills.length) || ob.img || ob.done) {
         var meRes = await fetch('https://creatorbridge-backend-tjrd.onrender.com/auth/me', { credentials: 'include' });
         var me = meRes.ok ? await meRes.json() : {};
-        localStorage.setItem('cb_onboarding_done', '1');
-        localStorage.setItem('cb_profile', JSON.stringify({ ...data.onboarding, name: me.user && me.user.name }));
-        applyProfile(data.onboarding, me.user && me.user.name);
+        var displayName = ob.name || (me.user && me.user.name);
+        applyProfile(ob, displayName);
         return;
       }
     }
   } catch(e) {}
-  // Clear any stale data from a previously logged-in account
+  // No onboarding data for this user — clear any stale localStorage and show onboarding
   localStorage.removeItem('cb_onboarding_done');
   localStorage.removeItem('cb_profile');
 })();
