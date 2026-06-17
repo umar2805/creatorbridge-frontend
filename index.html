@@ -1522,13 +1522,13 @@
       return;
     }
 
-    const existingUser = await checkExistingSession();
-    if (existingUser) { window.location.href = 'dashboard.html'; return; }
-
     if (loginResult === 'success') {
       window.location.href = 'dashboard.html';
       return;
     }
+
+    const existingUser = await checkExistingSession();
+    if (existingUser) { window.location.href = 'dashboard.html'; return; }
   })();
 </script>
 
