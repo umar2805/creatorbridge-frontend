@@ -914,9 +914,6 @@ function obFinish() {
   }
   if (obBio) document.getElementById('profile-bio-display').textContent = obBio;
   document.getElementById('onboarding-overlay').style.display = 'none';
-  var profile = { name: obName, bio: obBio, img: obProfileImg, skills: Array.from(selectedSkills) };
-  localStorage.setItem('cb_onboarding_done', '1');
-  localStorage.setItem('cb_profile', JSON.stringify(profile));
   fetch('https://creatorbridge-backend-tjrd.onrender.com/auth/onboarding', {
     method: 'POST', credentials: 'include',
     headers: { 'Content-Type': 'application/json' },
@@ -947,12 +944,9 @@ function obFinish() {
       }
     }
   } catch(e) {}
-  // Fall back to localStorage
-  if (!localStorage.getItem('cb_onboarding_done')) return;
-  try {
-    var p = JSON.parse(localStorage.getItem('cb_profile') || '{}');
-    applyProfile(p, p.name);
-  } catch(e) {}
+  // Clear any stale data from a previously logged-in account
+  localStorage.removeItem('cb_onboarding_done');
+  localStorage.removeItem('cb_profile');
 })();
 
 /* ══ NAV ══ */
